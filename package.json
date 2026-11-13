@@ -1,7 +1,7 @@
 {
   "name": "jongibit",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "description": "종이빛 (Jongibit) — REA 기반 3-in-1 컬러 이북 디스플레이 & 리더 (Android · iPadOS · PWA)",
   "scripts": {

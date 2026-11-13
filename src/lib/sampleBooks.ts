@@ -242,6 +242,86 @@ function createComicPanelDataUrl(pageNo: 1 | 2): string {
   return canvas.toDataURL('image/png');
 }
 
+function createWebtoonStripPanel(episodeIdx: number): string {
+  const canvas = document.createElement('canvas');
+  canvas.width = 760;
+  canvas.height = 1080;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return '';
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 760, 1080);
+
+  const palettes = [
+    ['#dbeafe', '#f59e0b', '#10b981', '“오전엔 밝은 색상 모드로 웹툰 정독!”'],
+    ['#fce7f3', '#ec4899', '#6366f1', '“스크롤 전환도 부드럽고 눈이 편안해~”'],
+    ['#fef3c7', '#ef4444', '#14b8a6', '“그림 그릴 땐 바로 드로잉·컬러링 탭으로!”'],
+    ['#ecfdf5', '#3b82f6', '#8b5cf6', '“태블릿 + 컬러 이북 + 드로잉패드 3-in-1!”'],
+  ] as const;
+
+  const [bgCol, accentA, accentB, caption] = palettes[episodeIdx % palettes.length];
+  ctx.fillStyle = bgCol;
+  ctx.fillRect(34, 34, 692, 1012);
+  ctx.strokeStyle = '#18181b';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(34, 34, 692, 1012);
+
+  ctx.fillStyle = accentA;
+  ctx.beginPath();
+  ctx.arc(380, 460, 175, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#ffe5c8';
+  ctx.beginPath();
+  ctx.arc(380, 440, 108, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#27272a';
+  ctx.beginPath();
+  ctx.moveTo(270, 400);
+  ctx.lineTo(310, 295);
+  ctx.lineTo(360, 345);
+  ctx.lineTo(405, 285);
+  ctx.lineTo(455, 345);
+  ctx.lineTo(492, 310);
+  ctx.lineTo(488, 405);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = accentB;
+  ctx.beginPath();
+  ctx.roundRect(250, 548, 260, 210, 42);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#18181b';
+  ctx.beginPath();
+  ctx.arc(342, 435, 11, 0, Math.PI * 2);
+  ctx.arc(418, 435, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(380, 472, 26, 0, Math.PI);
+  ctx.stroke();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.roundRect(70, 82, 620, 130, 26);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#111827';
+  ctx.font = 'bold 26px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(caption, 380, 155);
+
+  ctx.font = 'bold 22px sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(`종이빛 웹툰 컷 #${episodeIdx + 1}`, 380, 880);
+  return canvas.toDataURL('image/png');
+}
+
 export function buildSampleBooks(): BookItem[] {
   const camellia = createBotanicalIllustrationDataUrl('camellia');
   const iris = createBotanicalIllustrationDataUrl('iris');
@@ -249,6 +329,7 @@ export function buildSampleBooks(): BookItem[] {
 
   const comic1 = createComicPanelDataUrl(1);
   const comic2 = createComicPanelDataUrl(2);
+  const webtoonPanels = [0, 1, 2, 3].map((i) => createWebtoonStripPanel(i));
 
   return [
     {
@@ -330,6 +411,24 @@ export function buildSampleBooks(): BookItem[] {
           imageDataUrl: comic2,
         },
       ],
+    },
+    {
+      id: 'sample-webtoon-teahouse',
+      title: '종이빛 일상툰 — 3-in-1 컬러 웹툰 (세로 스크롤)',
+      author: '종이빛 웹툰 스튜디오',
+      format: 'cbz',
+      coverDataUrl: webtoonPanels[0],
+      currentPage: 0,
+      bookmarks: [],
+      annotations: {},
+      updatedAt: Date.now() - 500,
+      isSample: true,
+      pages: webtoonPanels.map((url, idx) => ({
+        index: idx,
+        title: `웹툰 ${idx + 1}컷`,
+        kind: 'image' as const,
+        imageDataUrl: url,
+      })),
     },
   ];
 }

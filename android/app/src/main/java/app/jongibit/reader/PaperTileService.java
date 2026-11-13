@@ -66,9 +66,9 @@ public class PaperTileService extends TileService {
         if (!enabled) {
             tile.setLabel("종이빛 필터");
         } else if ("ink-paper".equals(mode)) {
-            tile.setLabel("종이빛 · 잉크");
+            tile.setLabel("종이빛 · 잉크 용지");
         } else {
-            tile.setLabel("종이빛 · 컬러");
+            tile.setLabel("종이빛 · 밝은 색상");
         }
         tile.updateTile();
     }

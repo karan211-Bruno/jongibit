@@ -26,9 +26,16 @@ export const ReaderWorkspace: React.FC<ReaderWorkspaceProps> = ({
   const [penColor, setPenColor] = useState('#c9382b');
   const [showToc, setShowToc] = useState(false);
   const [showTypography, setShowTypography] = useState(false);
+  const [verticalWebtoon, setVerticalWebtoon] = useState<boolean>(
+    () => book.id === 'sample-webtoon-teahouse' || book.format === 'cbz'
+  );
   const [statusMsg, setStatusMsg] = useState('');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const activeStrokeRef = useRef<AnnotationStroke | null>(null);
+
+  useEffect(() => {
+    setVerticalWebtoon(book.id === 'sample-webtoon-teahouse' || book.format === 'cbz');
+  }, [book.id, book.format]);
 
   const pageIdx = Math.max(0, Math.min(book.pages.length - 1, book.currentPage));
   const currentPage = book.pages[pageIdx];
@@ -280,6 +287,14 @@ export const ReaderWorkspace: React.FC<ReaderWorkspaceProps> = ({
           )}
           <button
             type="button"
+            className={`tool-chip ${verticalWebtoon ? 'active' : ''}`}
+            data-testid="toggle-scroll-mode"
+            onClick={() => setVerticalWebtoon((v) => !v)}
+          >
+            {verticalWebtoon ? '세로 웹툰 스크롤' : '페이지 넘김'}
+          </button>
+          <button
+            type="button"
             className="ghost-btn"
             onClick={() => setShowTypography((v) => !v)}
           >
@@ -362,58 +377,87 @@ export const ReaderWorkspace: React.FC<ReaderWorkspaceProps> = ({
         )}
 
         <main className="reader-viewport">
-          <button
-            type="button"
-            className="page-nav-edge prev"
-            disabled={pageIdx === 0}
-            onClick={() => goToPage(pageIdx - 1)}
-            aria-label="이전 페이지"
-          >
-            ‹
-          </button>
+          {verticalWebtoon ? (
+            <div className="webtoon-scroll-container" data-testid="webtoon-scroll-feed">
+              {book.pages.map((pg) => (
+                <div
+                  key={pg.index}
+                  className="webtoon-panel-card"
+                  style={{ padding: `${Math.min(18, tuning.pageMargin)}px` }}
+                >
+                  {pg.kind === 'html' ? (
+                    <article
+                      className="ebook-prose"
+                      style={{
+                        fontSize: `${tuning.fontSize}px`,
+                        lineHeight: tuning.lineHeight,
+                      }}
+                      dangerouslySetInnerHTML={{ __html: pg.html || '' }}
+                    />
+                  ) : (
+                    <div className="ebook-image-page">
+                      <img src={pg.imageDataUrl} alt={pg.title || `웹툰 ${pg.index + 1}컷`} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="page-nav-edge prev"
+                disabled={pageIdx === 0}
+                onClick={() => goToPage(pageIdx - 1)}
+                aria-label="이전 페이지"
+              >
+                ‹
+              </button>
 
-          <div
-            className="reader-paper-sheet"
-            style={{
-              padding: `${tuning.pageMargin}px`,
-            }}
-          >
-            {currentPage?.kind === 'html' ? (
-              <article
-                className="ebook-prose"
+              <div
+                className="reader-paper-sheet"
                 style={{
-                  fontSize: `${tuning.fontSize}px`,
-                  lineHeight: tuning.lineHeight,
+                  padding: `${tuning.pageMargin}px`,
                 }}
-                dangerouslySetInnerHTML={{ __html: currentPage.html || '' }}
-              />
-            ) : (
-              <div className="ebook-image-page">
-                <img src={currentPage?.imageDataUrl} alt={currentPage?.title || '페이지'} />
+              >
+                {currentPage?.kind === 'html' ? (
+                  <article
+                    className="ebook-prose"
+                    style={{
+                      fontSize: `${tuning.fontSize}px`,
+                      lineHeight: tuning.lineHeight,
+                    }}
+                    dangerouslySetInnerHTML={{ __html: currentPage.html || '' }}
+                  />
+                ) : (
+                  <div className="ebook-image-page">
+                    <img src={currentPage?.imageDataUrl} alt={currentPage?.title || '페이지'} />
+                  </div>
+                )}
+
+                <canvas
+                  ref={canvasRef}
+                  width={1000}
+                  height={1400}
+                  className={`reader-annotation-canvas ${tool !== 'read' ? 'is-drawing' : ''}`}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                />
               </div>
-            )}
 
-            <canvas
-              ref={canvasRef}
-              width={1000}
-              height={1400}
-              className={`reader-annotation-canvas ${tool !== 'read' ? 'is-drawing' : ''}`}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-            />
-          </div>
-
-          <button
-            type="button"
-            className="page-nav-edge next"
-            disabled={pageIdx >= book.pages.length - 1}
-            onClick={() => goToPage(pageIdx + 1)}
-            aria-label="다음 페이지"
-          >
-            ›
-          </button>
+              <button
+                type="button"
+                className="page-nav-edge next"
+                disabled={pageIdx >= book.pages.length - 1}
+                onClick={() => goToPage(pageIdx + 1)}
+                aria-label="다음 페이지"
+              >
+                ›
+              </button>
+            </>
+          )}
         </main>
       </div>
 

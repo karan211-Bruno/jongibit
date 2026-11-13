@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import type { DisplayTuning, PaperMode } from '../types';
-import { MODE_INFO, nextPaperMode } from '../lib/xpaper';
+import { MODE_INFO } from '../lib/xpaper';
 
 interface PaperKeyBarProps {
   tuning: DisplayTuning;
   onChange: (patch: Partial<DisplayTuning>) => void;
   onOpenLibrary: () => void;
+  onOpenDrawing: () => void;
   onOpenStudio: () => void;
   onOpenSystem: () => void;
+  onOpenXPaperModal: () => void;
   hasActiveBook: boolean;
   onBackToReader?: () => void;
-  activeView: 'library' | 'reader' | 'system';
+  activeView: 'library' | 'reader' | 'drawing' | 'system';
 }
 
 const MODES: PaperMode[] = ['nature', 'light-color', 'ink-paper'];
@@ -19,8 +21,10 @@ export const PaperKeyBar: React.FC<PaperKeyBarProps> = ({
   tuning,
   onChange,
   onOpenLibrary,
+  onOpenDrawing,
   onOpenStudio,
   onOpenSystem,
+  onOpenXPaperModal,
   hasActiveBook,
   onBackToReader,
   activeView,
@@ -61,7 +65,7 @@ export const PaperKeyBar: React.FC<PaperKeyBarProps> = ({
               className={`xpaper-tab ${tuning.mode === m ? 'active' : ''}`}
               onClick={() => onChange({ mode: m })}
             >
-              {MODE_INFO[m].label}
+              {MODE_INFO[m].shortLabel}
             </button>
           ))}
         </div>
@@ -75,11 +79,20 @@ export const PaperKeyBar: React.FC<PaperKeyBarProps> = ({
           type="button"
           className="paper-key-btn"
           data-testid="paper-key-cycle"
-          title="원버튼 순환 (Alt+P)"
-          onClick={() => onChange({ mode: nextPaperMode(tuning.mode) })}
+          title="X-Paper 3모드 선택 패널 (Alt+P)"
+          onClick={onOpenXPaperModal}
         >
           <span className="paper-key-led" data-mode={tuning.mode} />
-          <span>종이빛 키</span>
+          <span>X-Paper 키</span>
+        </button>
+
+        <button
+          type="button"
+          className={`icon-pill ${activeView === 'drawing' ? 'is-active' : ''}`}
+          data-testid="open-drawing-studio"
+          onClick={onOpenDrawing}
+        >
+          드로잉·컬러링
         </button>
 
         <button

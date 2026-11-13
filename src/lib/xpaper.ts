@@ -34,23 +34,26 @@ export const INK_PAPER_MATRIX: ColorMatrix20 = [
 
 export const MODE_INFO: Record<
   PaperMode,
-  { label: string; sub: string; badge: string; indicatorLeftPercent: number }
+  { label: string; shortLabel: string; sub: string; badge: string; indicatorLeftPercent: number }
 > = {
   nature: {
-    label: '원본 컬러',
-    sub: '1670만 원색을 생생하게 재현',
+    label: '자연 색상 모드',
+    shortLabel: '자연 색상',
+    sub: '고화질의 밝은 원색',
     badge: 'Nature Color',
     indicatorLeftPercent: 0,
   },
   'light-color': {
-    label: '컬러 이북',
-    sub: '눈이 편안한 담채 색종이 톤',
+    label: '밝은 색상 모드',
+    shortLabel: '밝은 색상',
+    sub: '채도가 낮은 부드러운 색상의 종이 같은 디스플레이 효과',
     badge: 'Light Color',
     indicatorLeftPercent: 33.333,
   },
   'ink-paper': {
-    label: '흑백 잉크지',
-    sub: '종이처럼 차분한 정독용 모노크롬',
+    label: '잉크 용지 모드',
+    shortLabel: '잉크 용지',
+    sub: '흑백 잉크의 종이 같은 디스플레이 효과',
     badge: 'Ink Paper',
     indicatorLeftPercent: 66.666,
   },

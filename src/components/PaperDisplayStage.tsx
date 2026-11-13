@@ -18,6 +18,19 @@ export const PaperDisplayStage: React.FC<PaperDisplayStageProps> = ({
     computePaperMatrix(tuning.mode, tuning.strength, tuning.warmth),
   );
   const rafRef = useRef<number>(0);
+  const prevModeRef = useRef<string>(tuning.mode);
+  const [bloomKey, setBloomKey] = React.useState(0);
+  const [isBlooming, setIsBlooming] = React.useState(false);
+
+  useEffect(() => {
+    if (prevModeRef.current !== tuning.mode) {
+      prevModeRef.current = tuning.mode;
+      setBloomKey((k) => k + 1);
+      setIsBlooming(true);
+      const timer = window.setTimeout(() => setIsBlooming(false), 820);
+      return () => window.clearTimeout(timer);
+    }
+  }, [tuning.mode]);
 
   useEffect(() => {
     const target = computePaperMatrix(tuning.mode, tuning.strength, tuning.warmth);
@@ -93,8 +106,30 @@ export const PaperDisplayStage: React.FC<PaperDisplayStageProps> = ({
             />
             <feColorMatrix type="saturate" values="0" />
           </filter>
+          <filter id="jongibit-ink-bloom-disp" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.024"
+              numOctaves={4}
+              seed={11}
+              result="noise"
+            />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="52" />
+          </filter>
         </defs>
       </svg>
+
+      {isBlooming && (
+        <div
+          key={bloomKey}
+          className={`xpaper-ink-bloom mode-${tuning.mode}`}
+          data-testid="xpaper-ink-bloom"
+          aria-hidden="true"
+        >
+          <div className="ink-bloom-ring" />
+          <div className="ink-bloom-core" />
+        </div>
+      )}
 
       {tuning.compareSplit ? (
         <div className="compare-container">

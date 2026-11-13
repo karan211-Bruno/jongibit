@@ -16,21 +16,31 @@ import { PaperKeyBar } from './components/PaperKeyBar';
 import { ReaderWorkspace } from './components/ReaderWorkspace';
 import { ColorStudioModal } from './components/ColorStudioModal';
 import { SystemFilterPanel } from './components/SystemFilterPanel';
+import { XPaperModal } from './components/XPaperModal';
+import { DrawingStudio } from './components/DrawingStudio';
 
 export const App: React.FC = () => {
   const [tuning, setTuning] = useState<DisplayTuning>(DEFAULT_TUNING);
   const [books, setBooks] = useState<BookItem[]>([]);
   const [activeBookId, setActiveBookId] = useState<string | null>(null);
-  const [view, setView] = useState<'library' | 'reader' | 'system'>('library');
+  const [view, setView] = useState<'library' | 'reader' | 'drawing' | 'system'>('library');
   const [showStudio, setShowStudio] = useState(false);
+  const [showXPaperModal, setShowXPaperModal] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
   const refreshBooks = async () => {
     let items = await listBooks();
-    if (items.length === 0) {
-      const samples = buildSampleBooks();
-      for (const s of samples) await saveBook(s);
+    const samples = buildSampleBooks();
+    const existingIds = new Set(items.map((i) => i.id));
+    let added = false;
+    for (const s of samples) {
+      if (!existingIds.has(s.id)) {
+        await saveBook(s);
+        added = true;
+      }
+    }
+    if (added || items.length === 0) {
       items = await listBooks();
     }
     setBooks(items);
@@ -106,8 +116,10 @@ export const App: React.FC = () => {
         tuning={tuning}
         onChange={updateTuning}
         onOpenLibrary={() => setView('library')}
+        onOpenDrawing={() => setView('drawing')}
         onOpenStudio={() => setShowStudio(true)}
         onOpenSystem={() => setView('system')}
+        onOpenXPaperModal={() => setShowXPaperModal(true)}
         hasActiveBook={Boolean(activeBook)}
         onBackToReader={() => setView('reader')}
         activeView={view}
@@ -126,6 +138,8 @@ export const App: React.FC = () => {
               onChangeTuning={updateTuning}
               onBackToLibrary={() => setView('library')}
             />
+          ) : view === 'drawing' ? (
+            <DrawingStudio tuning={tuning} onBack={() => setView('library')} />
           ) : view === 'system' ? (
             <SystemFilterPanel
               tuning={tuning}
@@ -240,6 +254,13 @@ export const App: React.FC = () => {
       {showStudio && (
         <ColorStudioModal tuning={tuning} onClose={() => setShowStudio(false)} />
       )}
+
+      <XPaperModal
+        open={showXPaperModal}
+        currentMode={tuning.mode}
+        onSelectMode={(mode) => updateTuning({ mode })}
+        onClose={() => setShowXPaperModal(false)}
+      />
     </div>
   );
 };
